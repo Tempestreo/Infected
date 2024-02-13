@@ -2,6 +2,7 @@ using UnityEngine;
 using Cinemachine;
 public class Player : MonoBehaviour
 {
+    [SerializeField] GameObject _crosshair;
     [SerializeField] GameObject _mainCam;
     [SerializeField] GameObject _headCam;
     [SerializeField] CinemachineVirtualCamera _playerCam;
@@ -25,6 +26,7 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        _crosshair.SetActive(false);
         isAiming = false;
         isKneeling = false;
         rb = GetComponent<Rigidbody>();
@@ -35,7 +37,6 @@ public class Player : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.LeftControl) && isKneeling == false)
         {
-            Debug.Log("girdi");
             isKneeling = true;
             anim.SetBool("isKneeling", isKneeling);
         }
@@ -46,12 +47,15 @@ public class Player : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.Mouse1))
         {
+            _crosshair.SetActive(true);
             isAiming = true;
         }
         else if(Input.GetKeyUp(KeyCode.Mouse1))
         {
+            _crosshair.SetActive(false);
             isAiming = false;
         }
+
     }
     void FixedUpdate()
     {
@@ -60,6 +64,9 @@ public class Player : MonoBehaviour
         UpdateCamera();
         CamMovements();
         Movement();
+    }
+    private void LateUpdate()
+    {
     }
     void UpdateCamera()
     {
