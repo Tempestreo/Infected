@@ -7,16 +7,19 @@ public class Player : MonoBehaviour
     [SerializeField] GameObject _headCam;
     [SerializeField] CinemachineVirtualCamera _playerCam;
     Animator anim;
-    float _horizontal = 0f;
-    float _vertical = 0f;
     Rigidbody rb;
-    float headXRot, headYRot;
-    int rotationSpeed = 10;
-    int speed = 3;
-    RaycastHit hit;
+    public RaycastHit hit;
+
+    bool isAbleToShoot;
     bool isKneeling;
     bool isAiming;
 
+    int rotationSpeed = 20;
+
+    float speed = 3;
+    float _horizontal = 0f;
+    float _vertical = 0f;
+    float headXRot, headYRot;
     float aimZoomDistance = 1f;
     float aimSideOffset = 0.7f;
     float defaultZoomDistance = 2f;
@@ -28,6 +31,7 @@ public class Player : MonoBehaviour
     {
         _crosshair.SetActive(false);
         isAiming = false;
+        isAbleToShoot = true;
         isKneeling = false;
         rb = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>();
@@ -55,7 +59,6 @@ public class Player : MonoBehaviour
             _crosshair.SetActive(false);
             isAiming = false;
         }
-
     }
     void FixedUpdate()
     {
@@ -77,14 +80,14 @@ public class Player : MonoBehaviour
             thirdPersonCam.CameraDistance = Mathf.Lerp(thirdPersonCam.CameraDistance, aimZoomDistance, Time.deltaTime * zoomSpeed);
             thirdPersonCam.CameraSide = Mathf.Lerp(thirdPersonCam.CameraSide, aimSideOffset, Time.deltaTime * zoomSpeed);
             rotationSpeed = 5;
-            speed = 1;
+            speed = 1.5f;
             anim.SetFloat("AnimSpeed", 0.5f);
         }
         else
         {
             thirdPersonCam.CameraDistance = Mathf.Lerp(thirdPersonCam.CameraDistance, defaultZoomDistance, Time.deltaTime * zoomSpeed);
             thirdPersonCam.CameraSide = Mathf.Lerp(thirdPersonCam.CameraSide, defaultSideOffset, Time.deltaTime * zoomSpeed);
-            rotationSpeed = 10;
+            rotationSpeed = 20;
             speed = 3;
             anim.SetFloat("AnimSpeed", 1f);
         }
@@ -92,12 +95,14 @@ public class Player : MonoBehaviour
     private void CamMovements()
     {
         //cam movements
-        headXRot += Input.GetAxis("Mouse Y") * Time.deltaTime * -150;
-        headYRot += Input.GetAxis("Mouse X") * Time.deltaTime * 150;
+        headXRot += Input.GetAxis("Mouse Y") * Time.deltaTime * -450;
+        headYRot += Input.GetAxis("Mouse X") * Time.deltaTime * 450;
 
         headXRot = Mathf.Clamp(headXRot, -20, 20);
 
+        Physics.Raycast(Vector3.zero, _mainCam.transform.position, out hit);
         _headCam.transform.rotation = Quaternion.Euler(headXRot, headYRot, transform.eulerAngles.z);
+        Debug.DrawLine(Vector3.zero, hit.transform.position);
     }
     private void Movement()
     {
