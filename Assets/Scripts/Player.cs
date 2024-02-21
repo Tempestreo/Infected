@@ -1,18 +1,29 @@
 using UnityEngine;
+using System.Collections;
 using Cinemachine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 public class Player : MonoBehaviour
 {
+    [SerializeField] AudioClip[] footsteps;
+
+    [SerializeField] Volume Volume;
+    Vignette vignette;
+    DepthOfField dof;
+
     [SerializeField] GameObject _crosshair;
     [SerializeField] GameObject _mainCam;
     [SerializeField] GameObject _headCam;
+
     [SerializeField] CinemachineVirtualCamera _playerCam;
     Animator anim;
-    Rigidbody rb;
+    Rigidbody rb;  
+    [SerializeField] AudioSource audioSource;
     public RaycastHit hit;
 
-    bool isAbleToShoot;
     bool isKneeling;
     bool isAiming;
+    public bool isJumpscareEnded;
 
     int rotationSpeed = 20;
 
@@ -24,21 +35,50 @@ public class Player : MonoBehaviour
     float aimSideOffset = 0.7f;
     float defaultZoomDistance = 2f;
     float defaultSideOffset = 0.6f;
-
     float zoomSpeed = 5f;
+
+
+    //timer
+    float time;
+    float timer;
+
     // Start is called before the first frame update
     void Start()
     {
+        if (Volume != null)
+        {
+            // Get the vignette effect from the post process volume
+            Volume.profile.TryGet(out vignette);
+            // Get the depth of field effect from the post process volume
+            Volume.profile.TryGet(out dof);
+        }
         _crosshair.SetActive(false);
         isAiming = false;
-        isAbleToShoot = true;
         isKneeling = false;
         rb = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>();
+        time = 1.4f / speed;
+        timer = Time.time;
     }
 
     private void Update()
     {
+        if (isJumpscareEnded && vignette.intensity.value <= 0f)
+        {
+            vignette.intensity.Override(1);
+            dof.focalLength.Override(300);
+            vignette.intensity.value = 1;
+            dof.focalLength.value = 300;
+        }
+        if (isJumpscareEnded)
+        {
+            vignette.intensity.value -= Time.deltaTime/10;
+            dof.focalLength.value -= Time.deltaTime*30;
+            if (vignette.intensity.value <= 0f)
+            {
+                isJumpscareEnded = false;
+            }
+        }
         if (Input.GetKeyDown(KeyCode.LeftControl) && isKneeling == false)
         {
             isKneeling = true;
@@ -59,6 +99,7 @@ public class Player : MonoBehaviour
             _crosshair.SetActive(false);
             isAiming = false;
         }
+        timer += Time.deltaTime;
     }
     void FixedUpdate()
     {
@@ -67,9 +108,6 @@ public class Player : MonoBehaviour
         UpdateCamera();
         CamMovements();
         Movement();
-    }
-    private void LateUpdate()
-    {
     }
     void UpdateCamera()
     {
@@ -80,7 +118,8 @@ public class Player : MonoBehaviour
             thirdPersonCam.CameraDistance = Mathf.Lerp(thirdPersonCam.CameraDistance, aimZoomDistance, Time.deltaTime * zoomSpeed);
             thirdPersonCam.CameraSide = Mathf.Lerp(thirdPersonCam.CameraSide, aimSideOffset, Time.deltaTime * zoomSpeed);
             rotationSpeed = 5;
-            speed = 1.5f;
+            speed = 2f;
+            time = 1.4f / speed;
             anim.SetFloat("AnimSpeed", 0.5f);
         }
         else
@@ -89,6 +128,7 @@ public class Player : MonoBehaviour
             thirdPersonCam.CameraSide = Mathf.Lerp(thirdPersonCam.CameraSide, defaultSideOffset, Time.deltaTime * zoomSpeed);
             rotationSpeed = 20;
             speed = 3;
+            time = 1.4f / speed;
             anim.SetFloat("AnimSpeed", 1f);
         }
     }
@@ -106,14 +146,17 @@ public class Player : MonoBehaviour
     }
     private void Movement()
     {
-        if (isKneeling == false)
+        _horizontal = Input.GetAxis("Horizontal");
+        _vertical = Input.GetAxis("Vertical");
+        if (isKneeling == false && Mathf.Abs(_horizontal) >0f | Mathf.Abs(_vertical) > 0f)
         {
-            _horizontal = Input.GetAxis("Horizontal");
-            _vertical = Input.GetAxis("Vertical");
+            if (timer >= time)
+            {
+                timer = 0;
+                audioSource.PlayOneShot(footsteps[Random.Range(0, 10)], 1);
+            }
             Vector3 moveDirection = new Vector3(_horizontal, 0, _vertical);
-
             rb.MovePosition(transform.position + transform.TransformDirection(moveDirection.normalized) * Time.deltaTime * speed);
-
         }
 
         Vector3 lookDirection = _mainCam.transform.forward;
