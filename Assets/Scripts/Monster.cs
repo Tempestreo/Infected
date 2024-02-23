@@ -5,7 +5,7 @@ public class Monster : MonoBehaviour
 {
     //PostProcess
 
-    AudioSource audioSource;
+    [SerializeField] AudioSource audioSource;
     [SerializeField] AudioClip[] footsteps;
     // düþman AI geliþtirme------------------------------------------------------------------------------------------------------------------------------
     [SerializeField] AudioSource Scream;
@@ -38,10 +38,10 @@ public class Monster : MonoBehaviour
 
     //Health
     int fullHealth = 2;
-    int currentHealth;
+    public int currentHealth;
 
     //animator controllers
-    private bool isDied;
+    public bool isDied;
     private bool isMoving = false;
 
 
@@ -54,10 +54,10 @@ public class Monster : MonoBehaviour
 
     void Start()
     {
+
         anim = GetComponent<Animator>();
         enemyAgent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
-        audioSource = GetComponent<AudioSource>();
         player = FindObjectOfType<Player>();
 
         currentHealth = fullHealth;
@@ -108,7 +108,7 @@ public class Monster : MonoBehaviour
                 anim.SetBool("isDied", isDied);
                 Destroy(rb);
                 Destroy(enemyAgent);
-                Destroy(anim);
+                Destroy(audioSource);
             }
 
         }

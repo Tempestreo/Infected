@@ -135,8 +135,8 @@ public class Player : MonoBehaviour
     private void CamMovements()
     {
         //cam movements
-        headXRot += Input.GetAxis("Mouse Y") * Time.deltaTime * -450;
-        headYRot += Input.GetAxis("Mouse X") * Time.deltaTime * 450;
+        headXRot += Input.GetAxis("Mouse Y") * Time.deltaTime * -1000;
+        headYRot += Input.GetAxis("Mouse X") * Time.deltaTime * 1000;
 
         headXRot = Mathf.Clamp(headXRot, -20, 20);
 

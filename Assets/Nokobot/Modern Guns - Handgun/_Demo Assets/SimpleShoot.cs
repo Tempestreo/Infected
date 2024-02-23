@@ -5,6 +5,10 @@ using UnityEngine;
 [AddComponentMenu("Nokobot/Modern Guns/Simple Shoot")]
 public class SimpleShoot : MonoBehaviour
 {
+    [SerializeField]AudioSource audio;
+
+    [SerializeField]AudioClip audioClip;
+
     [Header("Prefab Refrences")]
     public GameObject bulletPrefab;
     public GameObject casingPrefab;
@@ -60,6 +64,7 @@ public class SimpleShoot : MonoBehaviour
         { return; }
 
         // Create a bullet and add force on it in direction of the barrel
+        audio.PlayOneShot(audioClip);
         Instantiate(bulletPrefab, barrelLocation.position, barrelLocation.rotation).GetComponent<Rigidbody>().AddForce(bulletLocation.forward * shotPower);
 
     }
